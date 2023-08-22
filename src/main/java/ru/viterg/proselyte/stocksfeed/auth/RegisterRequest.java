@@ -1,10 +1,12 @@
 package ru.viterg.proselyte.stocksfeed.auth;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.viterg.proselyte.stocksfeed.user.Role;
 
 @Data
 @Builder
@@ -12,7 +14,14 @@ import ru.viterg.proselyte.stocksfeed.user.Role;
 @NoArgsConstructor
 public class RegisterRequest {
 
-  private String email;
+  @NotBlank
+  @Size(min = 3)
+  private String username;
+  @NotBlank
+  @Size(min = 4)
   private String password;
-  private Role role;
+  @Email
+  @NotBlank
+  private String email;
+  private String role;
 }

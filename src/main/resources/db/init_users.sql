@@ -3,5 +3,7 @@ CREATE TABLE IF NOT EXISTS public.users (
     username VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     email VARCHAR(255),
-    role VARCHAR(255)
+    role VARCHAR(255),
+    activation_key VARCHAR(255),
+    is_active BOOLEAN default FALSE
 );

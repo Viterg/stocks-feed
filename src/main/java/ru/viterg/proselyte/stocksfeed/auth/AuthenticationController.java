@@ -4,10 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
@@ -16,6 +20,8 @@ import ru.viterg.proselyte.stocksfeed.service.RegisteredUserService;
 import ru.viterg.proselyte.stocksfeed.user.Role;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestController
@@ -28,6 +34,7 @@ public class AuthenticationController {
     private final RegisteredUserService userService;
 
     @PostMapping("/register")
+    @ResponseStatus(CREATED)
     @Operation(summary = "Registers a new user in the system.",
             responses = {
                     @ApiResponse(responseCode = "201"),
@@ -35,7 +42,7 @@ public class AuthenticationController {
                     @ApiResponse(responseCode = "500")
             })
     public Mono<RegisterResponse> register(@RequestBody @Valid RegisterRequest request) {
-        String username = request.getEmail();
+        String username = request.getUsername();
         return userService.findByUsername(username)
                 .hasElement()
                 .flatMap(hasElement -> {
@@ -44,6 +51,7 @@ public class AuthenticationController {
                                 new ResponseStatusException(CONFLICT, "User " + username + " already exists!"));
                     } else {
                         return userService.saveNew(username, request.getPassword(), request.getRole())
+                             // .doOnNext(ud -> mailService.sendActivationMail(username))
                                 .map(ud -> RegisterResponse.builder()
                                         .email(ud.getUsername())
                                         .role(Role.valueOf(ud.getRole()))
@@ -52,10 +60,23 @@ public class AuthenticationController {
                 });
     }
 
+    @GetMapping("/activate")
+    @Operation(summary = "Activates new registered user in the system.",
+            responses = {
+                    @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "404"),
+                    @ApiResponse(responseCode = "500")
+            })
+    public Mono<Void> activateAccount(@RequestParam("key") String key) {
+        return userService.activateRegistration(key)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(NOT_FOUND, "Activation key not found!")))
+                .then();
+    }
+
     @PostMapping("/login")
     @Operation(summary = "Authenticates user in the system.",
             responses = {
-                    @ApiResponse(responseCode = "201"),
+                    @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "401"),
                     @ApiResponse(responseCode = "500")
             })
@@ -64,6 +85,7 @@ public class AuthenticationController {
         var password = request.getPassword();
         return userService.findByUsername(username)
                 .filter(ud -> encoder.matches(password, ud.getPassword()))
+                .filter(UserDetails::isEnabled)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(UNAUTHORIZED)))
                 .map(ud -> new AuthenticationResponse(jwtService.generateToken(ud).getToken()));
     }

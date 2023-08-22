@@ -1,5 +1,6 @@
 package ru.viterg.proselyte.stocksfeed.user;
 
+import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,6 +28,7 @@ public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instan
     @Column("username")
     private String username;
 
+    @Email
     @Column("email")
     private String email;
 
@@ -35,6 +37,12 @@ public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instan
 
     @Column("role")
     private String role;
+
+    @Column("activation_key")
+    private String activationKey;
+
+    @Column("is_active")
+    private boolean isActive;
 
     @Override
     public boolean isNew() {
@@ -48,22 +56,22 @@ public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instan
 
     @Override
     public boolean isAccountNonExpired() {
-        return true;
+        return isActive;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return isActive;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
+        return isActive;
     }
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isActive;
     }
 
     @Override
