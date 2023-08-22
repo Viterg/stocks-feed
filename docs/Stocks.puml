@@ -1,0 +1,65 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+
+actor User
+database Redis as Cache order 80
+
+box "Controllers"
+participant StocksController as SC
+end box
+
+box "Services"
+participant StocksService as SS
+end box
+
+box "Repository"
+participant StocksRepository as SR
+end box
+
+User -> SC: GET: /companies
+activate SC
+SC --> SS: getAllCompanies
+activate SS
+SS --> SS: isLimited
+alt is limited?
+SS --> SC: Error
+SC --> User: Error
+else is free?
+SS --> SR: getAllCompanies
+activate SR
+SR --> Cache: getAllCompanies
+Cache --> SR: Companies data
+SR --> SS: Companies list
+deactivate SR
+SS --> SC: Companies list
+deactivate SR
+SC --> User: Companies list
+deactivate SS
+end
+deactivate SC
+
+User -> SC: GET: /stocks?ticker=?
+activate SC
+SC --> SS: getCompanyCurrentStock
+activate SS
+SS --> SS: isLimited
+alt is limited?
+SS --> SC: Error
+SC --> User: Error
+else is free?
+SS --> SR: getCompanyCurrentStock
+activate SR
+SR --> Cache: getCompanyCurrentStock
+Cache --> SR: Company current stock
+SR --> SS: Company current stock
+deactivate SR
+SS --> SC: Company current stock
+deactivate SR
+SC --> User: Company current stock
+deactivate SS
+end
+deactivate SC
+
+@enduml

@@ -1,0 +1,50 @@
+server:
+  port: 8086
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: stocks-feed
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+  cache:
+    type: redis
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD}
+  session:
+    store-type: redis
+  jackson:
+    deserialization:
+      ADJUST_DATES_TO_CONTEXT_TIME_ZONE: false
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+      FAIL_ON_NUMBERS_FOR_ENUMS: true
+      FAIL_ON_NULL_FOR_PRIMITIVES: true
+      USE_BIG_DECIMAL_FOR_FLOATS: true
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+    generator:
+      WRITE_BIGDECIMAL_AS_PLAIN: true
+
+springdoc:
+  default-produces-media-type: application/json
+  swagger-ui:
+    path: /api/docs/swagger-ui.html
+  api-docs:
+    path: /api/docs
+
+application:
+  security:
+    jwt:
+      secret-key: 0831cc44d311790836d6a4fc5c8c5dc1fb83ed1c536f74a3f03c3483a65fb3ce
+      expiration: 86400000 # a day
+
+logging:
+  level:
+    ROOT: INFO
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([-,%X{traceId:-},%X{spanId:-}]){blue}[%thread] %clr(%-5level) %clr(%logger{36}){magenta} - %msg%n"

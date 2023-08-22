@@ -1,0 +1,23 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class node0 as "registred  /* Зарегистрированные пользователи */" {
+   login  /* логин */: varchar
+   email  /* почта */: varchar
+   password  /* пароль */: varchar
+   createdAt  /* время создания */: datetime
+   updatedAt  /* время обновления */: datetime
+   createdBy  /* логин */: varchar
+   updatedBy  /* логин */: varchar
+}
+
+class node1 as "stocks  /* Стоки компаний */" {
+   ticker  /* тикер */: varchar
+   stock  /* цена */: bigint
+   actualOn  /* актуальное время */: datetime
+}
+
+@enduml

@@ -1,0 +1,49 @@
+@startuml
+!theme metal
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+skinparam maxmessagesize 60
+
+actor User
+database PostgreSQL as P order 90
+
+box "Controllers"
+participant AuthController as AC
+end box
+
+box "Services"
+participant RegisteredUserService as RUS
+participant ConfirmationService as CS
+end box
+
+box "Repository"
+participant RegisteredUserRepository as RUR
+end box
+
+User -> AC: /register
+AC -> RUS: registerUser
+RUS -> RUR: saveNewUser
+RUR -> P: saveUserData
+RUS ->o CS: sendConfirmationEmail
+
+-> User: Receive confirmation e-mail
+User -> AC: /confirm
+AC -> RUS: confirmUser
+RUS -> RUR: updateUserStatus
+RUR -> P: saveUserData
+
+User -> AC: /login
+activate AC
+AC -> User: Get JWT token
+deactivate AC
+
+User -> AC: /generateApiKey (JWT required)
+activate AC
+AC -> RUS: generateApiKey
+activate RUS
+RUS -> AC: apikey
+deactivate RUS
+AC -> User: apikey
+deactivate AC
+
+@enduml
