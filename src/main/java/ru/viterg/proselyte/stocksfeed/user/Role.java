@@ -9,13 +9,13 @@ import java.util.Collections;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toSet;
-import static ru.viterg.proselyte.stocksfeed.user.Permission.CAN_READ_STOCKS;
+import static ru.viterg.proselyte.stocksfeed.user.Permission.CAN_GENERATE_TOKEN;
 
 @RequiredArgsConstructor
 public enum Role {
 
     AUTHORIZED_NEW(Collections.emptySet()),
-    AUTHORIZED_REGULAR(Set.of(CAN_READ_STOCKS)),
+    AUTHORIZED_REGULAR(Set.of(CAN_GENERATE_TOKEN)),
     ;
 
     @Getter

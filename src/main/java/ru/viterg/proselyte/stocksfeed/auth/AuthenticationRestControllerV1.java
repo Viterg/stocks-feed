@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import ru.viterg.proselyte.stocksfeed.security.JwtService;
+import ru.viterg.proselyte.stocksfeed.service.MailService;
 import ru.viterg.proselyte.stocksfeed.service.RegisteredUserService;
 import ru.viterg.proselyte.stocksfeed.user.Role;
 
@@ -27,11 +29,12 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthenticationController {
+public class AuthenticationRestControllerV1 {
 
+    private final RegisteredUserService userService;
     private final JwtService jwtService;
     private final PasswordEncoder encoder;
-    private final RegisteredUserService userService;
+    private final MailService mailService;
 
     @PostMapping("/register")
     @ResponseStatus(CREATED)
@@ -50,8 +53,8 @@ public class AuthenticationController {
                         return Mono.error(
                                 new ResponseStatusException(CONFLICT, "User " + username + " already exists!"));
                     } else {
-                        return userService.saveNew(username, request.getPassword(), request.getRole())
-                             // .doOnNext(ud -> mailService.sendActivationMail(username))
+                        return userService.saveNew(username, request.getPassword(), request.getEmail())
+                                .doOnNext(ud -> mailService.sendActivationMail(ud.getEmail(), ud.getActivationKey()))
                                 .map(ud -> RegisterResponse.builder()
                                         .email(ud.getUsername())
                                         .role(Role.valueOf(ud.getRole()))
@@ -60,8 +63,8 @@ public class AuthenticationController {
                 });
     }
 
-    @GetMapping("/activate")
-    @Operation(summary = "Activates new registered user in the system.",
+    @GetMapping("/confirm")
+    @Operation(summary = "Confirms and activates new registered user in the system.",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "404"),
@@ -91,13 +94,16 @@ public class AuthenticationController {
     }
 
     @PostMapping("/get-api-key")
+    @PreAuthorize("hasAuthority('CAN_GENERATE_TOKEN')")
     @Operation(summary = "Gets a unique API key for a registered user.",
             responses = {
                     @ApiResponse(responseCode = "200"),
+                    @ApiResponse(responseCode = "401"),
+                    @ApiResponse(responseCode = "403"),
                     @ApiResponse(responseCode = "500")
             })
-    public Mono<String> getApiKey(@RequestBody @Valid AuthenticationRequest request) {
-        return Mono.empty();
+    public Mono<String> getApiKey() {
+        return userService.generateApiToken();
     }
 
 }

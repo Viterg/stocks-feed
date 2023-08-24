@@ -12,13 +12,11 @@ import org.springframework.security.web.server.authentication.AuthenticationWebF
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.web.server.WebFilter;
 import reactor.core.publisher.Mono;
-import ru.viterg.proselyte.stocksfeed.user.RegisteredUserRepository;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpHeaders.WWW_AUTHENTICATE;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION;
-import static ru.viterg.proselyte.stocksfeed.user.Permission.CAN_READ_STOCKS;
 
 @Configuration
 @EnableWebFluxSecurity

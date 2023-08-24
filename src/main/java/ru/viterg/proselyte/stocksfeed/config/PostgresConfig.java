@@ -1,8 +1,6 @@
 package ru.viterg.proselyte.stocksfeed.config;
 
 import io.r2dbc.spi.ConnectionFactory;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.r2dbc.R2dbcProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;

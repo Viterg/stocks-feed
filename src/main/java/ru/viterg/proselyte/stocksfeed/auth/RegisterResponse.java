@@ -12,6 +12,6 @@ import ru.viterg.proselyte.stocksfeed.user.Role;
 @NoArgsConstructor
 public class RegisterResponse {
 
-  private String email;
-  private Role role;
+    private String email;
+    private Role role;
 }

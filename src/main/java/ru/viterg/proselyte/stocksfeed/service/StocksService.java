@@ -16,7 +16,8 @@ public class StocksService {
     private final StocksInformationMapper stocksInformationMapper;
 
     @Cacheable(cacheNames = "stocks")
-    public String getStockInformation(String stockCode, String apiKey) {
+    public String getStockInformation(String stockCode) {
+        //        limiter.check() -> controllers (filter) level
         return null;
     }
 }

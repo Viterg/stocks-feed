@@ -13,7 +13,7 @@ end box
 
 box "Services"
 participant RegisteredUserService as RUS
-participant ConfirmationService as CS
+participant MailService as MS
 end box
 
 box "Repository"
@@ -24,11 +24,12 @@ User -> AC: /register
 AC -> RUS: registerUser
 RUS -> RUR: saveNewUser
 RUR -> P: saveUserData
-RUS ->o CS: sendConfirmationEmail
+RUS ->o MS: sendActivationMail
+MS -> User: e-mail
 
 -> User: Receive confirmation e-mail
 User -> AC: /confirm
-AC -> RUS: confirmUser
+AC -> RUS: activateRegistration
 RUS -> RUR: updateUserStatus
 RUR -> P: saveUserData
 

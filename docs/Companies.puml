@@ -1,0 +1,41 @@
+@startuml
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 20
+
+actor User
+database PostgreSQL as P order 90
+
+box "Controllers"
+participant CompaniesRestControllerV1 as CC
+end box
+
+box "Services"
+participant CompaniesService as CS
+end box
+
+box "Repository"
+participant CompaniesRepository as CR
+end box
+
+User -> CC: GET: /companies
+activate CC
+CC --> CS: getAllCompanies
+activate CS
+CS --> CS: isLimited
+alt is limited?
+CS --> CC: Error
+CC --> User: Error
+else is free?
+CS --> CR: getAllCompanies
+activate CR
+CR --> P: getAllCompanies
+P --> CR: Companies data
+CR --> CS: Companies list
+deactivate CR
+CS --> CC: Companies list
+deactivate CR
+CC --> User: Companies list
+deactivate CS
+end
+deactivate CC
+@enduml

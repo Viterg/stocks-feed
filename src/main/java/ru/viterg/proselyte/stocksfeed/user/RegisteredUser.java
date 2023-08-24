@@ -4,7 +4,11 @@ import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Auditable;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -44,6 +48,22 @@ public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instan
     @Column("is_active")
     private boolean isActive;
 
+    @CreatedDate
+    @Column("created_at")
+    private Instant createdAt;
+
+    @LastModifiedDate
+    @Column("updated_at")
+    private Instant updatedAt;
+
+    @CreatedBy
+    @Column("created_by")
+    private RegisteredUser createdBy;
+
+    @LastModifiedBy
+    @Column("updated_by")
+    private RegisteredUser updatedBy;
+
     @Override
     public boolean isNew() {
         return id == null;
@@ -76,41 +96,41 @@ public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instan
 
     @Override
     public Optional<RegisteredUser> getCreatedBy() {
-        return Optional.empty();
+        return Optional.ofNullable(createdBy);
     }
 
     @Override
     public void setCreatedBy(RegisteredUser createdBy) {
-
+        this.createdBy = createdBy;
     }
 
     @Override
     public Optional<Instant> getCreatedDate() {
-        return Optional.empty();
+        return Optional.ofNullable(createdAt);
     }
 
     @Override
     public void setCreatedDate(Instant creationDate) {
-
+        createdAt = creationDate;
     }
 
     @Override
     public Optional<RegisteredUser> getLastModifiedBy() {
-        return Optional.empty();
+        return Optional.ofNullable(updatedBy);
     }
 
     @Override
     public void setLastModifiedBy(RegisteredUser lastModifiedBy) {
-
+        updatedBy = lastModifiedBy;
     }
 
     @Override
     public Optional<Instant> getLastModifiedDate() {
-        return Optional.empty();
+        return Optional.ofNullable(updatedAt);
     }
 
     @Override
     public void setLastModifiedDate(Instant lastModifiedDate) {
-
+        updatedAt = lastModifiedDate;
     }
 }

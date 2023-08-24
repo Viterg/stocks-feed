@@ -13,7 +13,6 @@ import ru.viterg.proselyte.stocksfeed.user.RegisteredUserRepository;
 
 import java.util.UUID;
 
-import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.springframework.util.StringUtils.hasText;
 import static ru.viterg.proselyte.stocksfeed.user.Role.AUTHORIZED_NEW;
 
@@ -41,12 +40,17 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
     }
 
     @Transactional
-    public Mono<RegisteredUser> saveNew(String username, String password, String role) {
+    public Mono<RegisteredUser> saveNew(String username, String password, String email) {
         var newUser = new RegisteredUser();
         newUser.setUsername(username.toLowerCase());
+        newUser.setEmail(email);
         newUser.setPassword(hasText(password) ? encoder.encode(password) : password);
-        newUser.setRole(defaultIfNull(role, AUTHORIZED_NEW.name()));
+        newUser.setRole(AUTHORIZED_NEW.name());
         newUser.setActivationKey(UUID.randomUUID().toString());
         return repository.save(newUser);
+    }
+
+    public Mono<String> generateApiToken() {
+        return Mono.just(UUID.randomUUID().toString());
     }
 }
