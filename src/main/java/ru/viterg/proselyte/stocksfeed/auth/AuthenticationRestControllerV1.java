@@ -5,8 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,7 +20,6 @@ import reactor.core.publisher.Mono;
 import ru.viterg.proselyte.stocksfeed.security.JwtService;
 import ru.viterg.proselyte.stocksfeed.service.MailService;
 import ru.viterg.proselyte.stocksfeed.user.RegisteredUserService;
-import ru.viterg.proselyte.stocksfeed.user.Role;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
@@ -59,7 +57,7 @@ public class AuthenticationRestControllerV1 {
                                 .doOnNext(ud -> mailService.sendActivationMail(ud.getEmail(), ud.getActivationKey()))
                                 .map(ud -> RegisterResponse.builder()
                                         .email(ud.getEmail())
-                                        .role(Role.valueOf(ud.getRole()))
+                                        .role(ud.getRole())
                                         .build());
                     }
                 });
@@ -104,10 +102,8 @@ public class AuthenticationRestControllerV1 {
                     @ApiResponse(responseCode = "403"),
                     @ApiResponse(responseCode = "500")
             })
-    public Mono<String> getApiKey() {
-        Mono<UserDetails> userDetails = ReactiveSecurityContextHolder.getContext()
-                .map(SecurityContext::getAuthentication)
-                .map(authentication -> (UserDetails) authentication.getPrincipal());
+    public Mono<String> getApiKey(Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return userService.generateApiToken(userDetails);
     }
 

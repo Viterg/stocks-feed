@@ -43,13 +43,13 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
         newUser.setUsername(username.toLowerCase());
         newUser.setEmail(email);
         newUser.setPassword(hasText(password) ? encoder.encode(password) : password);
-        newUser.setRole(AUTHORIZED_NEW.name());
+        newUser.setRole(AUTHORIZED_NEW);
         newUser.setActivationKey(UUID.randomUUID().toString());
         return repository.save(newUser);
     }
 
-    public Mono<String> generateApiToken(Mono<UserDetails> userDetails) {
-        return userDetails.flatMap(ud -> repository.findByUsername(ud.getUsername()))
+    public Mono<String> generateApiToken(UserDetails userDetails) {
+        return repository.findByUsername(userDetails.getUsername())
                 .map(ud -> (RegisteredUser) ud)
                 .doOnNext(ud -> ud.setApiKey(UUID.randomUUID().toString()))
                 .map(RegisteredUser::getApiKey);

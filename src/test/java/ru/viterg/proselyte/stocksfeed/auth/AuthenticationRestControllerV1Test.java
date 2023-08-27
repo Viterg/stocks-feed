@@ -52,7 +52,7 @@ class AuthenticationRestControllerV1Test {
         RegisteredUser registeredUser = new RegisteredUser();
         registeredUser.setUsername(username);
         registeredUser.setEmail(email);
-        registeredUser.setRole(Role.AUTHORIZED_NEW.name());
+        registeredUser.setRole(Role.AUTHORIZED_NEW);
         registeredUser.setActivationKey("key");
 
         when(userService.findByUsername(username)).thenReturn(Mono.empty());
@@ -88,7 +88,7 @@ class AuthenticationRestControllerV1Test {
         RegisteredUser registeredUser = new RegisteredUser();
         registeredUser.setUsername(username);
         registeredUser.setEmail(email);
-        registeredUser.setRole(Role.AUTHORIZED_NEW.name());
+        registeredUser.setRole(Role.AUTHORIZED_NEW);
         registeredUser.setActivationKey("key");
 
         when(userService.findByUsername(username)).thenReturn(Mono.just(registeredUser));

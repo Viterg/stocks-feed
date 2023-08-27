@@ -23,11 +23,11 @@ import java.util.Optional;
 @Setter
 @NoArgsConstructor
 @Table(name = "users", schema = "public")
-public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instant>, UserDetails {
+public class RegisteredUser implements Auditable<RegisteredUser, Long, Instant>, UserDetails {
 
     @Id
     @Column("id")
-    private Integer id;
+    private Long id;
 
     @Column("username")
     private String username;
@@ -40,7 +40,7 @@ public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instan
     private String password;
 
     @Column("role")
-    private String role;
+    private Role role;
 
     @Column("activation_key")
     private String activationKey;
@@ -74,7 +74,7 @@ public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instan
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Role.valueOf(role).getAuthorities();
+        return role.getAuthorities();
     }
 
     @Override
