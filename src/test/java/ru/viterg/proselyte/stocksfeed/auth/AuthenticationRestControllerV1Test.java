@@ -122,6 +122,21 @@ class AuthenticationRestControllerV1Test {
     }
 
     @Test
+    @DisplayName("should return 404 if activation key not found")
+    void activateAccountNotFound() {
+        String activationKey = "key";
+
+        when(userService.activateRegistration(activationKey)).thenReturn(Mono.empty());
+
+        testClient.patch()
+                .uri(uriBuilder -> uriBuilder.path("/api/v1/auth/confirm")
+                        .queryParam("key", activationKey)
+                        .build())
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
     @DisplayName("should authenticate user and return its JWT token")
     void authenticate() {
         String username = "user";
@@ -151,6 +166,58 @@ class AuthenticationRestControllerV1Test {
                     assertEquals("token", response.getAccessToken());
                 })
                 .returnResult();
+    }
+
+    @Test
+    @DisplayName("should return error if credentials are invalid")
+    void authenticateInvalidPassword() {
+        String username = "user";
+        String password = "pass4";
+
+        AuthenticationRequest request = AuthenticationRequest.builder()
+                .username(username)
+                .password(password)
+                .build();
+
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setUsername(username);
+        registeredUser.setPassword("encodedPass");
+        registeredUser.setActive(true);
+
+        when(userService.findByUsername(username)).thenReturn(Mono.just(registeredUser));
+        when(encoder.matches(password, registeredUser.getPassword())).thenReturn(false);
+
+        testClient.post()
+                .uri("/api/v1/auth/login")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().is4xxClientError();
+    }
+
+    @Test
+    @DisplayName("should return error if user is not active")
+    void authenticateInactiveUser() {
+        String username = "user";
+        String password = "pass4";
+
+        AuthenticationRequest request = AuthenticationRequest.builder()
+                .username(username)
+                .password(password)
+                .build();
+
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setUsername(username);
+        registeredUser.setPassword("encodedPass");
+        registeredUser.setActive(false);
+
+        when(userService.findByUsername(username)).thenReturn(Mono.just(registeredUser));
+        when(encoder.matches(password, registeredUser.getPassword())).thenReturn(true);
+
+        testClient.post()
+                .uri("/api/v1/auth/login")
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().is4xxClientError();
     }
 
     @Test
