@@ -16,7 +16,10 @@ public class PostgresConfig {
     public ConnectionFactoryInitializer initializer(ConnectionFactory connectionFactory) {
         ConnectionFactoryInitializer initializer = new ConnectionFactoryInitializer();
         initializer.setConnectionFactory(connectionFactory);
-        initializer.setDatabasePopulator(new ResourceDatabasePopulator(new ClassPathResource("/db/init_users.sql")));
+        initializer.setDatabasePopulator(new ResourceDatabasePopulator(
+                new ClassPathResource("/db/init_users.sql"),
+                new ClassPathResource("/db/init_companies.sql")
+        ));
         return initializer;
     }
 }

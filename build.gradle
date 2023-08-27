@@ -64,7 +64,7 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation "org.testcontainers:postgresql:${testContainersVersion}"
-    testImplementation "org.testcontainers:redis:${testContainersVersion}"
+//    testImplementation "org.testcontainers:redis:${testContainersVersion}"
 }
 
 tasks.named('compileJava') {

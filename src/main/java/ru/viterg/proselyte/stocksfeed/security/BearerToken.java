@@ -9,7 +9,7 @@ public class BearerToken extends AbstractAuthenticationToken {
     @Getter
     private final String token;
 
-    BearerToken(String token) {
+    public BearerToken(String token) {
         super(AuthorityUtils.NO_AUTHORITIES);
         this.token = token;
     }

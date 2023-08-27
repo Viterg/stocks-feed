@@ -17,7 +17,7 @@ box "Repository"
 participant StocksRepository as SR
 end box
 
-User -> SC: GET: /stocks?ticker=?
+User -> SC: GET: /stocks?ticker=? (filtered by APIKEY)
 activate SC
 SC --> SS: getCompanyCurrentStock
 activate SS

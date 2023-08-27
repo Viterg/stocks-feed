@@ -1,8 +1,13 @@
 spring:
-  redis:
-    host: localhost
-    port: 6379
-    password:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
 
 logging:
   level:

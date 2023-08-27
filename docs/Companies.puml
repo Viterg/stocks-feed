@@ -17,7 +17,7 @@ box "Repository"
 participant CompaniesRepository as CR
 end box
 
-User -> CC: GET: /companies
+User -> CC: GET: /companies (filtered by APIKEY)
 activate CC
 CC --> CS: getAllCompanies
 activate CS

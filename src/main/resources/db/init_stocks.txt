@@ -1,0 +1,1 @@
+SET stocks:1 ticker AAPL stock 140.24 actual_on '2023.08.24 14:55:08'

@@ -7,17 +7,16 @@ spring:
   application:
     name: stocks-feed
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/postgres
-    username: postgres
-    password: postgres
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
   cache:
     type: redis
-  redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
-    password: ${REDIS_PASSWORD}
-  session:
-    store-type: redis
   jackson:
     deserialization:
       ADJUST_DATES_TO_CONTEXT_TIME_ZONE: false
@@ -42,6 +41,8 @@ application:
     jwt:
       secret-key: 0831cc44d311790836d6a4fc5c8c5dc1fb83ed1c536f74a3f03c3483a65fb3ce
       expiration: 86400000 # a day
+  web:
+    max-requests-per-minute: 60
 
 logging:
   level:

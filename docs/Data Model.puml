@@ -26,7 +26,7 @@ class node1 as "POSTGRES - companies  /* Компании */" {
 class node2 as "REDIS - stocks  /* Стоки компаний */" {
    ticker  /* тикер */: varchar
    stock  /* цена */: bigint
-   actualOn  /* актуальное время */: datetime
+   actual_on  /* актуальное время */: datetime
 }
 
 @enduml

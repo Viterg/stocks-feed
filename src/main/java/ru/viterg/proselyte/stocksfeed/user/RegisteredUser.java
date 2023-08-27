@@ -45,6 +45,9 @@ public class RegisteredUser implements Auditable<RegisteredUser, Integer, Instan
     @Column("activation_key")
     private String activationKey;
 
+    @Column("apikey")
+    private String apiKey;
+
     @Column("is_active")
     private boolean isActive;
 

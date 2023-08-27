@@ -5,9 +5,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 import ru.viterg.proselyte.stocksfeed.security.JwtService;
 import ru.viterg.proselyte.stocksfeed.service.MailService;
-import ru.viterg.proselyte.stocksfeed.service.RegisteredUserService;
+import ru.viterg.proselyte.stocksfeed.user.RegisteredUserService;
 import ru.viterg.proselyte.stocksfeed.user.Role;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
@@ -56,14 +58,14 @@ public class AuthenticationRestControllerV1 {
                         return userService.saveNew(username, request.getPassword(), request.getEmail())
                                 .doOnNext(ud -> mailService.sendActivationMail(ud.getEmail(), ud.getActivationKey()))
                                 .map(ud -> RegisterResponse.builder()
-                                        .email(ud.getUsername())
+                                        .email(ud.getEmail())
                                         .role(Role.valueOf(ud.getRole()))
                                         .build());
                     }
                 });
     }
 
-    @GetMapping("/confirm")
+    @PatchMapping("/confirm")
     @Operation(summary = "Confirms and activates new registered user in the system.",
             responses = {
                     @ApiResponse(responseCode = "200"),
@@ -84,7 +86,7 @@ public class AuthenticationRestControllerV1 {
                     @ApiResponse(responseCode = "500")
             })
     public Mono<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
-        var username = request.getEmail();
+        var username = request.getUsername();
         var password = request.getPassword();
         return userService.findByUsername(username)
                 .filter(ud -> encoder.matches(password, ud.getPassword()))
@@ -103,7 +105,10 @@ public class AuthenticationRestControllerV1 {
                     @ApiResponse(responseCode = "500")
             })
     public Mono<String> getApiKey() {
-        return userService.generateApiToken();
+        Mono<UserDetails> userDetails = ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(authentication -> (UserDetails) authentication.getPrincipal());
+        return userService.generateApiToken(userDetails);
     }
 
 }

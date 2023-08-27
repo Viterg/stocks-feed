@@ -1,4 +1,4 @@
-package ru.viterg.proselyte.stocksfeed.service;
+package ru.viterg.proselyte.stocksfeed.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
-import ru.viterg.proselyte.stocksfeed.user.RegisteredUser;
-import ru.viterg.proselyte.stocksfeed.user.RegisteredUserRepository;
 
 import java.util.UUID;
 
@@ -18,7 +16,7 @@ import static ru.viterg.proselyte.stocksfeed.user.Role.AUTHORIZED_NEW;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class RegisteredUserService implements ReactiveUserDetailsService {
 
@@ -26,6 +24,7 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
     private final PasswordEncoder encoder;
 
     @Override
+    @Transactional(readOnly = true)
     public Mono<UserDetails> findByUsername(String username) {
         return repository.findByUsername(username);
     }
@@ -39,7 +38,6 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
                 });
     }
 
-    @Transactional
     public Mono<RegisteredUser> saveNew(String username, String password, String email) {
         var newUser = new RegisteredUser();
         newUser.setUsername(username.toLowerCase());
@@ -50,7 +48,10 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
         return repository.save(newUser);
     }
 
-    public Mono<String> generateApiToken() {
-        return Mono.just(UUID.randomUUID().toString());
+    public Mono<String> generateApiToken(Mono<UserDetails> userDetails) {
+        return userDetails.flatMap(ud -> repository.findByUsername(ud.getUsername()))
+                .map(ud -> (RegisteredUser) ud)
+                .doOnNext(ud -> ud.setApiKey(UUID.randomUUID().toString()))
+                .map(RegisteredUser::getApiKey);
     }
 }

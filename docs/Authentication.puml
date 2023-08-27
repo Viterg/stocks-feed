@@ -42,6 +42,8 @@ User -> AC: /generateApiKey (JWT required)
 activate AC
 AC -> RUS: generateApiKey
 activate RUS
+RUS -> RUR: saveUserToken
+RUR -> P: saveUserData
 RUS -> AC: apikey
 deactivate RUS
 AC -> User: apikey
