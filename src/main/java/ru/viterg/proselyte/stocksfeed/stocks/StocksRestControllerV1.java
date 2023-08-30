@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/api/v1/stocks")
@@ -17,14 +20,14 @@ public class StocksRestControllerV1 {
     private final StocksService stocksService;
 
     @GetMapping("/{stock_code}/quote")
-    // TODO Access with api-key through filter
     @Operation(summary = "Gets current information about the stock price for the specified company.",
             responses = {
                     @ApiResponse(responseCode = "200"),
                     @ApiResponse(responseCode = "401"),
+                    @ApiResponse(responseCode = "403"),
                     @ApiResponse(responseCode = "500")
             })
-    public String getInformation(@PathVariable("stock_code") @NotBlank String stockCode) {
+    public Mono<BigDecimal> getInformation(@PathVariable("stock_code") @NotBlank String stockCode) {
         return stocksService.getStockInformation(stockCode);
     }
 

@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 class AuthenticationRestControllerV1Test {
 
@@ -162,9 +163,7 @@ class AuthenticationRestControllerV1Test {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(AuthenticationResponse.class)
-                .value(response -> {
-                    assertEquals("token", response.getAccessToken());
-                })
+                .value(response -> assertEquals("token", response.getAccessToken()))
                 .returnResult();
     }
 
@@ -224,16 +223,35 @@ class AuthenticationRestControllerV1Test {
     @WithMockUser(authorities = "CAN_GENERATE_TOKEN")
     @DisplayName("should generate API key for current user")
     void getApiKey() {
+        when(jwtService.extractUsername(any())).thenReturn("user");
         when(userService.generateApiToken(any())).thenReturn(Mono.just("api-key"));
 
         testClient.post()
                 .uri("/api/v1/auth/get-api-key")
+                .header(AUTHORIZATION, "Bearer")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)
-                .value(response -> {
-                    assertEquals("api-key", response);
-                })
+                .value(response -> assertEquals("api-key", response))
                 .returnResult();
+    }
+
+    @Test
+    @DisplayName("should return error for unauthorized user")
+    void getApiKeyUnauthorized() {
+        testClient.post()
+                .uri("/api/v1/auth/get-api-key")
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    @WithMockUser(roles = "AUTHORIZED_NEW")
+    @DisplayName("should return error for user who cannot generate API key")
+    void getApiKeyWithoutPermission() {
+        testClient.post()
+                .uri("/api/v1/auth/get-api-key")
+                .exchange()
+                .expectStatus().isForbidden();
     }
 }

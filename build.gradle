@@ -28,8 +28,8 @@ ext {
     mapstructVersion = '1.5.5.Final'
     springdocVersion = '1.6.9'
     jjwtVersion = '0.11.5'
-    testContainersVersion = '1.17.6'
-    jmailVersion = '2.0.1'
+    testContainersVersion = '1.18.3'
+    jmailVersion = '2.1.2'
 }
 
 dependencies {
@@ -41,8 +41,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+//    implementation 'org.springframework.boot:spring-boot-starter-mail'
     // services
     implementation "jakarta.mail:jakarta.mail-api:${jmailVersion}"
+    implementation "org.eclipse.angus:angus-mail:2.0.2"
+//    implementation "jakarta.activation:jakarta.activation-api:${jmailVersion}"
     implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
     runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
     runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
@@ -52,7 +55,6 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'org.postgresql:r2dbc-postgresql'
     implementation 'org.redisson:redisson:3.17.0'
-//    implementation 'io.github.resilience4j:resilience4j-ratelimiter:1.7.1'
     // docs
     implementation "org.springdoc:springdoc-openapi-webflux-ui:${springdocVersion}"
 

@@ -43,6 +43,9 @@ application:
       expiration: 86400000 # a day
   web:
     max-requests-per-minute: 60
+  redis:
+    stocks:
+      expiration: P1D
 
 logging:
   level:

@@ -10,14 +10,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.ReactiveRedisOperations;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import ru.viterg.proselyte.stocksfeed.stocks.Stock;
+
+import java.time.Duration;
 
 @Configuration
 public class RedisConfiguration {
@@ -29,23 +31,29 @@ public class RedisConfiguration {
     private int redisPort;
 
     @Bean
-    public ReactiveRedisConnectionFactory lettuceConnectionFactory() {
-        return new LettuceConnectionFactory(redisHost, redisPort);
+    public ReactiveRedisOperations<String, Stock> reactiveRedisStockTemplate(ReactiveRedisConnectionFactory factory) {
+        var context = RedisSerializationContext
+                .<String, Stock>newSerializationContext(new StringRedisSerializer())
+                .value(new Jackson2JsonRedisSerializer<>(Stock.class))
+                .build();
+        // TODO set TTL for data
+        return new ReactiveRedisTemplate<>(factory, context);
     }
 
     @Bean
-    public ReactiveRedisOperations<String, Stock> reactiveRedisStockTemplate(
-            ReactiveRedisConnectionFactory lettuceConnectionFactory) {
-        RedisSerializer<Stock> serializer = new Jackson2JsonRedisSerializer<>(Stock.class);
-        RedisSerializationContext<String, Stock> context = RedisSerializationContext
-                .<String, Stock>newSerializationContext(new StringRedisSerializer())
-                .value(serializer)
-                .hashValue(serializer)
-                .hashKey(serializer)
+    public ReactiveRedisTemplate<String, Long> reactiveRedisLongTemplate(ReactiveRedisConnectionFactory factory) {
+        var context = RedisSerializationContext
+                .<String, Long>newSerializationContext(new JdkSerializationRedisSerializer())
+                .key(StringRedisSerializer.UTF_8)
+                .value(new GenericToStringSerializer<>(Long.class))
                 .build();
-        return new ReactiveRedisTemplate<>(lettuceConnectionFactory, context);
+        return new ReactiveRedisTemplate<>(factory, context);
     }
 
+    @Bean
+    public Duration stocksKeyExpiration(@Value("${application.redis.stocks.expiration}") String expiration) {
+        return Duration.parse(expiration);
+    }
 
     @Bean(destroyMethod = "shutdown")
     public RedissonReactiveClient redisson() {
@@ -60,6 +68,5 @@ public class RedisConfiguration {
         limiter.trySetRate(RateType.OVERALL, 1, 1, RateIntervalUnit.SECONDS); // 1 RPS
         return limiter;
     }
-
 }
 

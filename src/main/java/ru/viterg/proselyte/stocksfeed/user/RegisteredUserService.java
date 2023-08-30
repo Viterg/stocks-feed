@@ -31,11 +31,13 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
 
     public Mono<RegisteredUser> activateRegistration(String key) {
         return repository.findByActivationKey(key)
-                .doOnNext(ud -> {
+                .map(ud -> {
                     ud.setActive(true);
-                    ud.setActivationKey(null);
-                    log.debug("Activated user: {}", ud.getUsername());
-                });
+                    ud.setActivationKey("");
+                    return ud;
+                })
+                .flatMap(repository::save)
+                .doOnSuccess(ud -> log.debug("Activated user: {}", ud.getUsername()));
     }
 
     public Mono<RegisteredUser> saveNew(String username, String password, String email) {
@@ -48,8 +50,8 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
         return repository.save(newUser);
     }
 
-    public Mono<String> generateApiToken(UserDetails userDetails) {
-        return repository.findByUsername(userDetails.getUsername())
+    public Mono<String> generateApiToken(String username) {
+        return repository.findByUsername(username)
                 .map(ud -> (RegisteredUser) ud)
                 .doOnNext(ud -> ud.setApiKey(UUID.randomUUID().toString()))
                 .map(RegisteredUser::getApiKey);

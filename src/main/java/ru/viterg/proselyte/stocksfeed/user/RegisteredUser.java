@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @Setter
 @NoArgsConstructor
 @Table(name = "users", schema = "public")
-public class RegisteredUser implements Auditable<RegisteredUser, Long, Instant>, UserDetails {
+public class RegisteredUser implements Auditable<Long, Long, Instant>, UserDetails {
 
     @Id
     @Column("id")
@@ -36,6 +37,7 @@ public class RegisteredUser implements Auditable<RegisteredUser, Long, Instant>,
     @Column("email")
     private String email;
 
+    @ToString.Exclude
     @Column("password_hash")
     private String password;
 
@@ -61,11 +63,11 @@ public class RegisteredUser implements Auditable<RegisteredUser, Long, Instant>,
 
     @CreatedBy
     @Column("created_by")
-    private RegisteredUser createdBy;
+    private Long createdBy;
 
     @LastModifiedBy
     @Column("updated_by")
-    private RegisteredUser updatedBy;
+    private Long updatedBy;
 
     @Override
     public boolean isNew() {
@@ -98,12 +100,12 @@ public class RegisteredUser implements Auditable<RegisteredUser, Long, Instant>,
     }
 
     @Override
-    public Optional<RegisteredUser> getCreatedBy() {
+    public Optional<Long> getCreatedBy() {
         return Optional.ofNullable(createdBy);
     }
 
     @Override
-    public void setCreatedBy(RegisteredUser createdBy) {
+    public void setCreatedBy(Long createdBy) {
         this.createdBy = createdBy;
     }
 
@@ -118,12 +120,12 @@ public class RegisteredUser implements Auditable<RegisteredUser, Long, Instant>,
     }
 
     @Override
-    public Optional<RegisteredUser> getLastModifiedBy() {
+    public Optional<Long> getLastModifiedBy() {
         return Optional.ofNullable(updatedBy);
     }
 
     @Override
-    public void setLastModifiedBy(RegisteredUser lastModifiedBy) {
+    public void setLastModifiedBy(Long lastModifiedBy) {
         updatedBy = lastModifiedBy;
     }
 

@@ -36,7 +36,7 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http, WebFilter jwtAuthenticationWebFilter,
-            WebFilter apikeyWebFilter) {
+            WebFilter apikeyWebFilter, WebFilter rateLimiterWebFilter) {
         http.authorizeExchange(exchange -> exchange
                         .pathMatchers(publicPaths)
                         .permitAll()
@@ -47,6 +47,7 @@ public class SecurityConfiguration {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .addFilterAt(jwtAuthenticationWebFilter, AUTHENTICATION)
                 .addFilterAfter(apikeyWebFilter, AUTHENTICATION)
+                .addFilterAfter(rateLimiterWebFilter, AUTHENTICATION)
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint((exchange, e) -> Mono.fromRunnable(() -> {
                             exchange.getResponse().setStatusCode(UNAUTHORIZED);
@@ -68,10 +69,11 @@ public class SecurityConfiguration {
 
     @Bean
     public WebFilter apikeyWebFilter(PathPattern pathPattern) {
+        // TODO add rate limiter to this filter
         return (exchange, chain) -> {
             if (pathPattern.matches(exchange.getRequest().getPath().pathWithinApplication())) {
                 String apikey = exchange.getRequest().getHeaders().getFirst(API_KEY_HEADER);
-                return exchange.getPrincipal()
+                return exchange.getPrincipal()// TODO no principal! by JWT
                         .map(ud -> (RegisteredUser) ud)
                         .flatMap(ud -> {
                             if (Objects.equals(apikey, ud.getApiKey())) {

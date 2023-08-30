@@ -8,4 +8,5 @@ INSERT INTO companies
 VALUES (1, 'AAPL'),
        (2, 'MSFT'),
        (3, 'META'),
-       (4, 'AMZN');
+       (4, 'AMZN')
+ON CONFLICT DO NOTHING;

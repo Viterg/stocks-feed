@@ -1,1 +1,6 @@
-SET stocks:1 ticker AAPL stock 140.24 actual_on '2023.08.24 14:55:08'
+HMSET stocks:AAPL@20230824 ticker "AAPL" stock "140.24" actual_on "2023.08.24 14:55:08"
+HMSET stocks:MSFT@20230824 ticker "MSFT" stock "221.47" actual_on "2023.08.24 14:55:08"
+HMSET stocks:GOGL@20230824 ticker "GOGL" stock "196.12" actual_on "2023.08.24 14:55:08"
+HMSET stocks:AAPL@20230825 ticker "AAPL" stock "140.24" actual_on "2023.08.25 11:22:16"
+HMSET stocks:MSFT@20230825 ticker "MSFT" stock "221.47" actual_on "2023.08.25 11:22:16"
+HMSET stocks:GOGL@20230825 ticker "GOGL" stock "196.12" actual_on "2023.08.25 11:22:16"

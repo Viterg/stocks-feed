@@ -7,11 +7,14 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Data
-@RedisHash
+@RedisHash("stocks")
 public class Stock {
 
-    private String id;
     private String ticker;
     private BigDecimal stock;
     private Instant actualOn;
+
+    public String id() {
+        return String.format("%s-%s-%s", ticker, stock, actualOn);
+    }
 }

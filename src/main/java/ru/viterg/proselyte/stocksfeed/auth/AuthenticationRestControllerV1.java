@@ -5,12 +5,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -21,6 +21,7 @@ import ru.viterg.proselyte.stocksfeed.security.JwtService;
 import ru.viterg.proselyte.stocksfeed.service.MailService;
 import ru.viterg.proselyte.stocksfeed.user.RegisteredUserService;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -102,9 +103,8 @@ public class AuthenticationRestControllerV1 {
                     @ApiResponse(responseCode = "403"),
                     @ApiResponse(responseCode = "500")
             })
-    public Mono<String> getApiKey(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        return userService.generateApiToken(userDetails);
+    public Mono<String> getApiKey(@RequestHeader(AUTHORIZATION) String authorization) {
+        String username = jwtService.extractUsername(authorization);
+        return userService.generateApiToken(username);
     }
-
 }
