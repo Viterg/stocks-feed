@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import static org.springframework.util.StringUtils.hasText;
 import static ru.viterg.proselyte.stocksfeed.user.Role.AUTHORIZED_NEW;
+import static ru.viterg.proselyte.stocksfeed.user.Role.AUTHORIZED_REGULAR;
 
 @Slf4j
 @Service
@@ -34,6 +35,7 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
                 .map(ud -> {
                     ud.setActive(true);
                     ud.setActivationKey("");
+                    ud.setRole(AUTHORIZED_REGULAR);
                     return ud;
                 })
                 .flatMap(repository::save)

@@ -16,11 +16,9 @@ import ru.viterg.proselyte.stocksfeed.user.RegisteredUserService;
 import ru.viterg.proselyte.stocksfeed.user.Role;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 class AuthenticationRestControllerV1Test {
 
@@ -220,15 +218,13 @@ class AuthenticationRestControllerV1Test {
     }
 
     @Test
-    @WithMockUser(authorities = "CAN_GENERATE_TOKEN")
+    @WithMockUser(username = "user", authorities = "CAN_GENERATE_TOKEN")
     @DisplayName("should generate API key for current user")
     void getApiKey() {
-        when(jwtService.extractUsername(any())).thenReturn("user");
-        when(userService.generateApiToken(any())).thenReturn(Mono.just("api-key"));
+        when(userService.generateApiToken("user")).thenReturn(Mono.just("api-key"));
 
         testClient.post()
                 .uri("/api/v1/auth/get-api-key")
-                .header(AUTHORIZATION, "Bearer")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(String.class)

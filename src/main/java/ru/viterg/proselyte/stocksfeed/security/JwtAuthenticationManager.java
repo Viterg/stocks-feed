@@ -21,15 +21,14 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
         return Mono.justOrEmpty(authentication)
                 .filter(auth -> auth instanceof BearerToken)
                 .map(auth -> (BearerToken) auth)
-                .flatMap(this::validate)
-                .onErrorMap(error -> new AuthenticationServiceException(error.getMessage()));
+                .flatMap(this::validate);
     }
 
     private Mono<Authentication> validate(BearerToken bearerToken) {
         String jwt = bearerToken.getToken();
         return userDetailsService.findByUsername(jwtService.extractUsername(jwt))
                 .filter(ud -> jwtService.isTokenValid(jwt, ud))
-                .switchIfEmpty(Mono.empty())
+                .switchIfEmpty(Mono.error(new AuthenticationServiceException("Invalid token")))
                 .map(ud -> new UsernamePasswordAuthenticationToken(ud, null, ud.getAuthorities()));
     }
 }
