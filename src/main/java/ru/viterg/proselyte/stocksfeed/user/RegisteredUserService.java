@@ -32,12 +32,9 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
 
     public Mono<RegisteredUser> activateRegistration(String key) {
         return repository.findByActivationKey(key)
-                .map(ud -> {
-                    ud.setActive(true);
-                    ud.setActivationKey("");
-                    ud.setRole(AUTHORIZED_REGULAR);
-                    return ud;
-                })
+                .doOnNext(ud -> ud.setActive(true))
+                .doOnNext(ud -> ud.setActivationKey(""))
+                .doOnNext(ud -> ud.setRole(AUTHORIZED_REGULAR))
                 .flatMap(repository::save)
                 .doOnSuccess(ud -> log.debug("Activated user: {}", ud.getUsername()));
     }
@@ -56,6 +53,7 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
         return repository.findByUsername(username)
                 .map(ud -> (RegisteredUser) ud)
                 .doOnNext(ud -> ud.setApiKey(UUID.randomUUID().toString()))
+                .doOnNext(repository::save)
                 .map(RegisteredUser::getApiKey);
     }
 }
