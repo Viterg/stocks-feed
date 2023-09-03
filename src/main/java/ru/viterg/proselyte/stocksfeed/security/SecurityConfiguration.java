@@ -72,6 +72,6 @@ public class SecurityConfiguration {
 
     @Bean
     public PathPattern apikeyPathPattern() {
-        return new PathPatternParser().parse("/api/v1/*");
+        return new PathPatternParser().parse("/api/v1/**");
     }
 }

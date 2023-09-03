@@ -6,8 +6,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +31,6 @@ public class AuthenticationRestControllerV1 {
 
     private final RegisteredUserService userService;
     private final JwtService jwtService;
-    private final PasswordEncoder encoder;
     private final MailService mailService;
 
     @PostMapping("/register")
@@ -53,12 +50,9 @@ public class AuthenticationRestControllerV1 {
                         return Mono.error(
                                 new ResponseStatusException(CONFLICT, "User " + username + " already exists!"));
                     } else {
-                        return userService.saveNew(username, request.getPassword(), request.getEmail())
+                        return userService.saveNew(username, request.getEmail(), request.getPassword())
                                 .doOnNext(ud -> mailService.sendActivationMail(ud.getEmail(), ud.getActivationKey()))
-                                .map(ud -> RegisterResponse.builder()
-                                        .email(ud.getEmail())
-                                        .role(ud.getRole())
-                                        .build());
+                                .map(ud -> new RegisterResponse(ud.getEmail(), ud.getRole()));
                     }
                 });
     }
@@ -84,11 +78,7 @@ public class AuthenticationRestControllerV1 {
                     @ApiResponse(responseCode = "500")
             })
     public Mono<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
-        var username = request.getUsername();
-        var password = request.getPassword();
-        return userService.findByUsername(username)
-                .filter(ud -> encoder.matches(password, ud.getPassword()))
-                .filter(UserDetails::isEnabled)
+        return userService.getValidatedUser(request.getUsername(), request.getPassword())
                 .switchIfEmpty(Mono.error(new ResponseStatusException(UNAUTHORIZED)))
                 .map(ud -> new AuthenticationResponse(jwtService.generateToken(ud).getToken()));
     }
@@ -103,7 +93,6 @@ public class AuthenticationRestControllerV1 {
                     @ApiResponse(responseCode = "500")
             })
     public Mono<String> getApiKey(Mono<Authentication> authentication) {
-//        String username = jwtService.extractUsername(authorization);
         return authentication.flatMap(auth -> userService.generateApiToken(auth.getName()));
     }
 }

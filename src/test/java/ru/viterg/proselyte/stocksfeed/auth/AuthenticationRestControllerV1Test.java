@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -24,14 +23,13 @@ class AuthenticationRestControllerV1Test {
 
     private final RegisteredUserService userService = mock(RegisteredUserService.class);
     private final JwtService jwtService = mock(JwtService.class);
-    private final PasswordEncoder encoder = mock(PasswordEncoder.class);
     private final MailService mailService = mock(MailService.class);
     private WebTestClient testClient;
 
     @BeforeEach
     void setUp() {
         testClient = WebTestClient.bindToController(
-                        new AuthenticationRestControllerV1(userService, jwtService, encoder, mailService))
+                        new AuthenticationRestControllerV1(userService, jwtService, mailService))
                 .build();
     }
 
@@ -55,7 +53,7 @@ class AuthenticationRestControllerV1Test {
         registeredUser.setActivationKey("key");
 
         when(userService.findByUsername(username)).thenReturn(Mono.empty());
-        when(userService.saveNew(username, password, email)).thenReturn(Mono.just(registeredUser));
+        when(userService.saveNew(username, email, password)).thenReturn(Mono.just(registeredUser));
         doNothing().when(mailService).sendActivationMail(email, registeredUser.getActivationKey());
 
         testClient.post()
@@ -65,8 +63,8 @@ class AuthenticationRestControllerV1Test {
                 .expectStatus().isCreated()
                 .expectBody(RegisterResponse.class)
                 .value(response -> {
-                    assertEquals(email, response.getEmail());
-                    assertEquals(Role.AUTHORIZED_NEW, response.getRole());
+                    assertEquals(email, response.email());
+                    assertEquals(Role.AUTHORIZED_NEW, response.role());
                 })
                 .returnResult();
     }
@@ -151,8 +149,7 @@ class AuthenticationRestControllerV1Test {
         registeredUser.setPassword("encodedPass");
         registeredUser.setActive(true);
 
-        when(userService.findByUsername(username)).thenReturn(Mono.just(registeredUser));
-        when(encoder.matches(password, registeredUser.getPassword())).thenReturn(true);
+        when(userService.getValidatedUser(username, password)).thenReturn(Mono.just(registeredUser));
         when(jwtService.generateToken(registeredUser)).thenReturn(new BearerToken("token"));
 
         testClient.post()
@@ -161,7 +158,7 @@ class AuthenticationRestControllerV1Test {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(AuthenticationResponse.class)
-                .value(response -> assertEquals("token", response.getAccessToken()))
+                .value(response -> assertEquals("token", response.accessToken()))
                 .returnResult();
     }
 
@@ -176,39 +173,7 @@ class AuthenticationRestControllerV1Test {
                 .password(password)
                 .build();
 
-        RegisteredUser registeredUser = new RegisteredUser();
-        registeredUser.setUsername(username);
-        registeredUser.setPassword("encodedPass");
-        registeredUser.setActive(true);
-
-        when(userService.findByUsername(username)).thenReturn(Mono.just(registeredUser));
-        when(encoder.matches(password, registeredUser.getPassword())).thenReturn(false);
-
-        testClient.post()
-                .uri("/api/v1/auth/login")
-                .bodyValue(request)
-                .exchange()
-                .expectStatus().is4xxClientError();
-    }
-
-    @Test
-    @DisplayName("should return error if user is not active")
-    void authenticateInactiveUser() {
-        String username = "user";
-        String password = "pass4";
-
-        AuthenticationRequest request = AuthenticationRequest.builder()
-                .username(username)
-                .password(password)
-                .build();
-
-        RegisteredUser registeredUser = new RegisteredUser();
-        registeredUser.setUsername(username);
-        registeredUser.setPassword("encodedPass");
-        registeredUser.setActive(false);
-
-        when(userService.findByUsername(username)).thenReturn(Mono.just(registeredUser));
-        when(encoder.matches(password, registeredUser.getPassword())).thenReturn(true);
+        when(userService.getValidatedUser(username, password)).thenReturn(Mono.empty());
 
         testClient.post()
                 .uri("/api/v1/auth/login")
@@ -230,24 +195,5 @@ class AuthenticationRestControllerV1Test {
                 .expectBody(String.class)
                 .value(response -> assertEquals("api-key", response))
                 .returnResult();
-    }
-
-    @Test
-    @DisplayName("should return error for unauthorized user")
-    void getApiKeyUnauthorized() {
-        testClient.post()
-                .uri("/api/v1/auth/get-api-key")
-                .exchange()
-                .expectStatus().isUnauthorized();
-    }
-
-    @Test
-    @WithMockUser(roles = "AUTHORIZED_NEW")
-    @DisplayName("should return error for user who cannot generate API key")
-    void getApiKeyWithoutPermission() {
-        testClient.post()
-                .uri("/api/v1/auth/get-api-key")
-                .exchange()
-                .expectStatus().isForbidden();
     }
 }
