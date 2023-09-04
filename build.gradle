@@ -24,14 +24,6 @@ repositories {
     maven { url 'https://repo.spring.io/snapshot' }
 }
 
-ext {
-    mapstructVersion = '1.5.5.Final'
-    springdocVersion = '1.6.9'
-    jjwtVersion = '0.11.5'
-    testContainersVersion = '1.18.3'
-    jmailVersion = '2.1.2'
-}
-
 dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     // spring
@@ -41,32 +33,32 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-//    implementation 'org.springframework.boot:spring-boot-starter-mail'
     // services
-    implementation "jakarta.mail:jakarta.mail-api:${jmailVersion}"
-    implementation "org.eclipse.angus:angus-mail:2.0.2"
-//    implementation "jakarta.activation:jakarta.activation-api:${jmailVersion}"
-    implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
-    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
-    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
-    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    implementation "jakarta.mail:jakarta.mail-api:$jmailVersion"
+    implementation "org.eclipse.angus:angus-mail:$angusMailVersion"
+    implementation "io.jsonwebtoken:jjwt-api:$jjwtVersion"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:$jjwtVersion"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:$jjwtVersion"
+    implementation "org.mapstruct:mapstruct:$mapstructVersion"
+    annotationProcessor "org.mapstruct:mapstruct-processor:$mapstructVersion"
     // db tools
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'org.postgresql:r2dbc-postgresql'
-    implementation 'org.redisson:redisson:3.17.0'
+    implementation "org.redisson:redisson:$redissonVersion"
     // docs
-    implementation "org.springdoc:springdoc-openapi-webflux-ui:${springdocVersion}"
+    implementation "org.springdoc:springdoc-openapi-webflux-ui:$springdocVersion"
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation "org.testcontainers:postgresql:${testContainersVersion}"
-//    testImplementation "org.testcontainers:redis:${testContainersVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:$testContainersVersion"
+    testImplementation "com.redis.testcontainers:testcontainers-redis-junit-jupiter:$redisTestContainersVersion"
 }
 
 tasks.named('compileJava') {
