@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'ru.viterg'
-version = '0.0.1-SNAPSHOT'
+version = '0.1.0'
 
 java {
     sourceCompatibility = '17'
@@ -57,8 +57,6 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'io.projectreactor:reactor-test'
-    testImplementation "org.testcontainers:junit-jupiter:$testContainersVersion"
-    testImplementation "com.redis.testcontainers:testcontainers-redis-junit-jupiter:$redisTestContainersVersion"
 }
 
 tasks.named('compileJava') {

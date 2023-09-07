@@ -4,6 +4,8 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  main:
+    web-application-type: reactive
   application:
     name: stocks-feed
   r2dbc:
@@ -44,6 +46,8 @@ application:
   web:
     max-requests-per-minute: 60
   redis:
+    api-key:
+      expiration: P7D
     stocks:
       expiration: P1D
 

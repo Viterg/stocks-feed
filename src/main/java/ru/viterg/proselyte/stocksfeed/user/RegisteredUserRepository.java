@@ -11,4 +11,6 @@ public interface RegisteredUserRepository extends R2dbcRepository<RegisteredUser
     Mono<UserDetails> findByUsername(String username);
 
     Mono<RegisteredUser> findByActivationKey(String key);
+
+    Mono<RegisteredUser> findByApiKey(String key);
 }

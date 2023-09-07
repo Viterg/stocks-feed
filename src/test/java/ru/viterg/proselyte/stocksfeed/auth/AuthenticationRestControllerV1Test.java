@@ -1,8 +1,11 @@
 package ru.viterg.proselyte.stocksfeed.auth;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -16,22 +19,20 @@ import ru.viterg.proselyte.stocksfeed.user.Role;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@WebFluxTest(AuthenticationRestControllerV1.class)
+@Import(WebFluxControllerSecurityTestConfig.class)
 class AuthenticationRestControllerV1Test {
 
-    private final RegisteredUserService userService = mock(RegisteredUserService.class);
-    private final JwtService jwtService = mock(JwtService.class);
-    private final MailService mailService = mock(MailService.class);
+    @MockBean
+    private RegisteredUserService userService;
+    @MockBean
+    private JwtService jwtService;
+    @MockBean
+    private MailService mailService;
+    @Autowired
     private WebTestClient testClient;
-
-    @BeforeEach
-    void setUp() {
-        testClient = WebTestClient.bindToController(
-                        new AuthenticationRestControllerV1(userService, jwtService, mailService))
-                .build();
-    }
 
     @Test
     @DisplayName("should create new user and return its email and role")
@@ -188,7 +189,8 @@ class AuthenticationRestControllerV1Test {
     void getApiKey() {
         when(userService.generateApiToken("user")).thenReturn(Mono.just("api-key"));
 
-        testClient.post()
+        testClient
+                .post()
                 .uri("/api/v1/auth/get-api-key")
                 .exchange()
                 .expectStatus().isOk()

@@ -29,7 +29,7 @@ class StocksRestControllerV1Test {
         when(stocksService.getStockInformation("AAPL")).thenReturn(Mono.just(expected));
 
         testClient.get()
-                .uri("/api/v1/stocks/AAPL/quote")
+                .uri("/api/v1/sec/stocks/AAPL/quote")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(BigDecimal.class)

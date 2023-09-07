@@ -1,9 +1,6 @@
 package ru.viterg.proselyte.stocksfeed.config;
 
 import org.redisson.Redisson;
-import org.redisson.api.RRateLimiterReactive;
-import org.redisson.api.RateIntervalUnit;
-import org.redisson.api.RateType;
 import org.redisson.api.RedissonReactiveClient;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +33,6 @@ public class RedisConfiguration {
                 .<String, Stock>newSerializationContext(new StringRedisSerializer())
                 .value(new Jackson2JsonRedisSerializer<>(Stock.class))
                 .build();
-        // TODO set TTL for data
         return new ReactiveRedisTemplate<>(factory, context);
     }
 
@@ -60,13 +56,6 @@ public class RedisConfiguration {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://%s:%s".formatted(redisHost, redisPort));
         return Redisson.create(config).reactive();
-    }
-
-    @Bean
-    public RRateLimiterReactive rateLimiter(RedissonReactiveClient redisson) {
-        RRateLimiterReactive limiter = redisson.getRateLimiter("myLimiter");
-        limiter.trySetRate(RateType.OVERALL, 1, 1, RateIntervalUnit.SECONDS); // 1 RPS
-        return limiter;
     }
 }
 

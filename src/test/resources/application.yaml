@@ -1,15 +1,3 @@
-spring:
-  datasource:
-    container-name: postgres:13.7
-    db-name: stocks
-    username: postgres
-    password: postgres
-    driverClassName: org.postgresql.Driver
-  redis:
-    host: localhost
-    port: 6379
-    password:
-
 logging:
   level:
     ROOT: INFO

@@ -28,7 +28,7 @@ class CompaniesRestControllerV1Test {
         when(companiesRepository.findAll()).thenReturn(Flux.just(new Company(1, "TICKER1"), new Company(2, "TICKER2")));
 
         testClient.get()
-                .uri("/api/v1/companies")
+                .uri("/api/v1/sec/companies")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(List.class)

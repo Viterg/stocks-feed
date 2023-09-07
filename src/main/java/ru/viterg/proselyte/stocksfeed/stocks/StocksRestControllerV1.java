@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/api/v1/stocks")
+@RequestMapping("/api/v1/sec/stocks")
 @RequiredArgsConstructor
 public class StocksRestControllerV1 {
 

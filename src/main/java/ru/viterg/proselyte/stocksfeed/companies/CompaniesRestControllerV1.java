@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/companies")
+@RequestMapping("/api/v1/sec/companies")
 @RequiredArgsConstructor
 public class CompaniesRestControllerV1 {
 

@@ -12,7 +12,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.util.pattern.PathPattern;
 import reactor.core.publisher.Mono;
-import ru.viterg.proselyte.stocksfeed.user.RegisteredUser;
+import ru.viterg.proselyte.stocksfeed.user.RegisteredUserRepository;
 
 import java.nio.ByteBuffer;
 import java.time.Duration;
@@ -30,25 +30,35 @@ public class WebConfig {
 
     private static final String API_KEY_HEADER = "API-KEY";
     private final ReactiveRedisTemplate<String, Long> reactiveRedisLongTemplate;
+    private final RegisteredUserRepository repository;
     @Value("${application.web.max-requests-per-minute}")
     private Long maxRequestsPerMinute = 60L;
 
     @Bean
-    public WebFilter apikeyLimiterWebFilter(PathPattern apikeyPathPattern) {
+    public WebFilter apikeyLimiterWebFilter(PathPattern apikeyPathPattern, Duration apiKeyExpiration) {
         return (exchange, chain) -> {
             if (apikeyPathPattern.matches(exchange.getRequest().getPath())) {
                 String apikey = extractApikey(exchange);
-                return exchange.getPrincipal()
-                        .map(ud -> (RegisteredUser) ud)
-                        .filter(ud -> Objects.equals(apikey, ud.getApiKey()))
+                return checkApiKeyExistence(apikey, apiKeyExpiration)
                         .switchIfEmpty(Mono.error(new ResponseStatusException(FORBIDDEN)))
-                        .flatMap(ud -> {
+                        .flatMap(udCount -> {
                             String key = String.format("rl_%s:%s", apikey, LocalTime.now().getMinute());
                             return checkLimit(key, exchange, chain);
                         });
             }
             return chain.filter(exchange);
         };
+    }
+
+    private Mono<Long> checkApiKeyExistence(String apikey, Duration apiKeyExpiration) {
+        return reactiveRedisLongTemplate.opsForValue().get(apikey)
+                .switchIfEmpty(repository.findByApiKey(apikey)
+                                       .flatMap(ud -> Objects.isNull(ud) ? Mono.empty() : Mono.just(1L))
+                                       .flatMap(count -> saveApiKeyCount(apikey, apiKeyExpiration, count)));
+    }
+
+    private Mono<Long> saveApiKeyCount(String apikey, Duration apiKeyExpiration, Long count) {
+        return reactiveRedisLongTemplate.opsForValue().set(apikey, count, apiKeyExpiration).map(b -> count);
     }
 
     private Mono<Void> checkLimit(String key, ServerWebExchange exchange, WebFilterChain chain) {
@@ -70,5 +80,10 @@ public class WebConfig {
 
     private static String extractApikey(ServerWebExchange exchange) {
         return exchange.getRequest().getHeaders().getFirst(API_KEY_HEADER);
+    }
+
+    @Bean
+    public Duration apiKeyExpiration(@Value("${application.redis.api-key.expiration}") String expiration) {
+        return Duration.parse(expiration);
     }
 }
