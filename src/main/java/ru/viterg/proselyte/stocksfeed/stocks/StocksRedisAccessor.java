@@ -41,7 +41,7 @@ public class StocksRedisAccessor {
      * Delete a key that contained in a hash key.
      *
      * @param key key value - must not be null.
-     * @return 1 Success or 0 Error.
+     * @return Mono of true if success or false otherwise.
      */
     public Mono<Boolean> remove(String key) {
         return template.opsForValue().delete(key);

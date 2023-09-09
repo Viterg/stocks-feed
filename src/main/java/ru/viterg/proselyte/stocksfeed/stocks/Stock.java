@@ -9,12 +9,7 @@ import java.time.Instant;
 @Data
 @RedisHash("stocks")
 public class Stock {
-
     private String ticker;
     private BigDecimal stock;
     private Instant actualOn;
-
-    public String id() {
-        return String.format("%s-%s-%s", ticker, stock, actualOn);
-    }
 }

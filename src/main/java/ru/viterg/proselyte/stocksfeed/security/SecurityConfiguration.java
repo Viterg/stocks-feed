@@ -28,7 +28,7 @@ import static org.springframework.security.config.web.server.SecurityWebFiltersO
 public class SecurityConfiguration {
 
     private final String[] publicPaths = {"/api/v1/auth/register", "/api/v1/auth/confirm",
-            "/api/v1/auth/login", "/api/docs/**", "/swagger-ui.html"};
+            "/api/v1/auth/login", "/api/v1/sec/**", "/api/docs/**", "/swagger-ui.html", "/actuator/**"};
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http, WebFilter jwtAuthWebFilter,

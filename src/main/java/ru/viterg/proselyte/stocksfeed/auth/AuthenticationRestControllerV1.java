@@ -1,7 +1,6 @@
 package ru.viterg.proselyte.stocksfeed.auth;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,12 +34,7 @@ public class AuthenticationRestControllerV1 {
 
     @PostMapping("/register")
     @ResponseStatus(CREATED)
-    @Operation(summary = "Registers a new user in the system.",
-            responses = {
-                    @ApiResponse(responseCode = "201"),
-                    @ApiResponse(responseCode = "409"),
-                    @ApiResponse(responseCode = "500")
-            })
+    @Operation(summary = "Registers a new user in the system")
     public Mono<RegisterResponse> register(@RequestBody @Valid RegisterRequest request) {
         String username = request.getUsername();
         return userService.findByUsername(username)
@@ -58,12 +52,7 @@ public class AuthenticationRestControllerV1 {
     }
 
     @PatchMapping("/confirm")
-    @Operation(summary = "Confirms and activates new registered user in the system.",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "404"),
-                    @ApiResponse(responseCode = "500")
-            })
+    @Operation(summary = "Confirms and activates new registered user in the system")
     public Mono<Void> activateAccount(@RequestParam("key") String key) {
         return userService.activateRegistration(key)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(NOT_FOUND, "Activation key not found!")))
@@ -71,12 +60,7 @@ public class AuthenticationRestControllerV1 {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Authenticates user in the system.",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401"),
-                    @ApiResponse(responseCode = "500")
-            })
+    @Operation(summary = "Authenticates user in the system")
     public Mono<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
         return userService.getValidatedUser(request.getUsername(), request.getPassword())
                 .switchIfEmpty(Mono.error(new ResponseStatusException(UNAUTHORIZED)))
@@ -85,13 +69,7 @@ public class AuthenticationRestControllerV1 {
 
     @PostMapping("/get-api-key")
     @PreAuthorize("hasAuthority('CAN_GENERATE_TOKEN')")
-    @Operation(summary = "Gets a unique API key for a registered user.",
-            responses = {
-                    @ApiResponse(responseCode = "200"),
-                    @ApiResponse(responseCode = "401"),
-                    @ApiResponse(responseCode = "403"),
-                    @ApiResponse(responseCode = "500")
-            })
+    @Operation(summary = "Gets a unique API key for a registered user")
     public Mono<String> getApiKey(Mono<Authentication> authentication) {
         return authentication.flatMap(auth -> userService.generateApiToken(auth.getName()));
     }

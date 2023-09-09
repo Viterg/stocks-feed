@@ -1,5 +1,7 @@
 package ru.viterg.proselyte.stocksfeed.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonReactiveClient;
 import org.redisson.config.Config;
@@ -28,10 +30,17 @@ public class RedisConfiguration {
     private int redisPort;
 
     @Bean
+    public ObjectMapper objectMapper() {
+        var mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper;
+    }
+
+    @Bean
     public ReactiveRedisOperations<String, Stock> reactiveRedisStockTemplate(ReactiveRedisConnectionFactory factory) {
         var context = RedisSerializationContext
                 .<String, Stock>newSerializationContext(new StringRedisSerializer())
-                .value(new Jackson2JsonRedisSerializer<>(Stock.class))
+                .value(new Jackson2JsonRedisSerializer<>(objectMapper(), Stock.class))
                 .build();
         return new ReactiveRedisTemplate<>(factory, context);
     }
@@ -46,16 +55,16 @@ public class RedisConfiguration {
         return new ReactiveRedisTemplate<>(factory, context);
     }
 
-    @Bean
-    public Duration stocksKeyExpiration(@Value("${application.redis.stocks.expiration}") String expiration) {
-        return Duration.parse(expiration);
-    }
-
     @Bean(destroyMethod = "shutdown")
     public RedissonReactiveClient redisson() {
         Config config = new Config();
         config.useSingleServer().setAddress("redis://%s:%s".formatted(redisHost, redisPort));
         return Redisson.create(config).reactive();
+    }
+
+    @Bean
+    public Duration stocksKeyExpiration(@Value("${application.redis.stocks.expiration}") String expiration) {
+        return Duration.parse(expiration);
     }
 }
 

@@ -87,7 +87,7 @@ public class RegisteredUserService implements ReactiveUserDetailsService {
         return repository.findByUsername(username.toLowerCase())
                 .map(ud -> (RegisteredUser) ud)
                 .doOnNext(ud -> ud.setApiKey(UUID.randomUUID().toString()))
-                .doOnNext(repository::save)
+                .flatMap(repository::save)
                 .map(RegisteredUser::getApiKey);
     }
 }

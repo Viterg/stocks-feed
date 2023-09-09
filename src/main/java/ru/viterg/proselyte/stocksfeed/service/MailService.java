@@ -36,8 +36,8 @@ public class MailService {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage, isMultipart, UTF_8.name());
-            message.setTo(to);
             message.setFrom("Stocks Feed <noreply@stocks-feed>");
+            message.setTo(to);
             message.setSubject(subject);
             message.setText(content, isHtml);
             javaMailSender.send(mimeMessage);
