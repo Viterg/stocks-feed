@@ -12,5 +12,5 @@ spring:
 logging:
   level:
     ROOT: INFO
-    web: debug
+    web: DEBUG
     ru.viterg.proselyte: DEBUG

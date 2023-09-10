@@ -23,7 +23,7 @@ public class StocksRedisAccessor {
      * @return Stock.
      */
     public Mono<Stock> get(String key) {
-        return template.opsForValue().get(key);
+        return template.opsForValue().get(key).onErrorStop();
     }
 
     /**
