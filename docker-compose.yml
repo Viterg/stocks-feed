@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  app:
+    container_name: stocks-feed
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8086"
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      POSTGRES_URL: r2dbc:postgresql://postgres:5432/postgres
+      POSTGRES_USERNAME: postgres
+      POSTGRES_PASSWORD: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD:
+      GMAIL_USERNAME: user@gmail.com
+      GMAIL_PASSWORD: password
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+  redis:
+    image: redis:latest
+    command: redis-server --save 20 1 --loglevel warning
+    ports:
+      - "6379:6379"
+    volumes:
+      - cache:/data
+volumes:
+  cache:
+    driver: local

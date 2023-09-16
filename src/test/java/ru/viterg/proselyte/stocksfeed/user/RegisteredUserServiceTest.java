@@ -95,7 +95,7 @@ class RegisteredUserServiceTest {
     @DisplayName("should return generated API key")
     void generateApiToken() {
         var updatedUser = new RegisteredUser();
-        updatedUser.setApiKey("apikey");
+        updatedUser.setApiKey(UUID.randomUUID().toString());
 
         when(repository.findByUsername(username)).thenReturn(Mono.just(registeredUser));
         when(repository.save(registeredUser)).thenReturn(Mono.just(updatedUser));

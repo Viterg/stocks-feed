@@ -70,3 +70,11 @@ tasks.named('compileJava') {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+bootJar {
+    archiveBaseName = 'stocks-feed'
+}
+
+jar {
+    enabled = false
+}

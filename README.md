@@ -8,7 +8,11 @@ Requests are limited by rate limiter filter implementation. Users are stored in 
 ### Getting started
 For project building run:
 ```  
-./gradlew clean build 
+gradlew clean build 
+```
+For local launch run:
+```  
+docker-compose up --build 
 ```
 ### Additional Links
 These additional references should also help you:
