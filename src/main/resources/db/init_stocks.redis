@@ -1,0 +1,6 @@
+SET stocks:AAPL@20230824 {"ticker":"AAPL","stock":140.24,"actualOn":1692958530.000000000}
+SET stocks:MSFT@20230824 {"ticker":"MSFT","stock":221.47,"actualOn":1692958530.000000000}
+SET stocks:GOGL@20230824 {"ticker":"GOGL","stock":196.12,"actualOn":1692958530.000000000}
+SET stocks:AAPL@20230825 {"ticker":"AAPL","stock":141.28,"actualOn":1692958670.000000000}
+SET stocks:MSFT@20230825 {"ticker":"MSFT","stock":222.07,"actualOn":1692958670.000000000}
+SET stocks:GOGL@20230825 {"ticker":"GOGL","stock":194.88,"actualOn":1692958670.000000000}
