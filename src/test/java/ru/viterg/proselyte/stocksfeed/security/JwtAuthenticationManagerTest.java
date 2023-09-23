@@ -3,6 +3,10 @@ package ru.viterg.proselyte.stocksfeed.security;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
@@ -12,15 +16,18 @@ import ru.viterg.proselyte.stocksfeed.user.RegisteredUser;
 
 import java.util.Objects;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static ru.viterg.proselyte.stocksfeed.user.Role.AUTHORIZED_REGULAR;
 
+@ExtendWith(MockitoExtension.class)
 class JwtAuthenticationManagerTest {
 
+    @InjectMocks
     private JwtAuthenticationManager jwtAuthenticationManager;
-    private final JwtService jwtService = mock(JwtService.class);
-    private final ReactiveUserDetailsService userDetailsService = mock(ReactiveUserDetailsService.class);
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private ReactiveUserDetailsService userDetailsService;
 
     private String jwt;
     private String username;
@@ -29,8 +36,6 @@ class JwtAuthenticationManagerTest {
 
     @BeforeEach
     void setUp() {
-        jwtAuthenticationManager = new JwtAuthenticationManager(jwtService, userDetailsService);
-
         jwt = "token";
         username = "user";
         authentication = new BearerToken(jwt);
@@ -69,7 +74,6 @@ class JwtAuthenticationManagerTest {
     void nonExistedAuthentication() {
         when(jwtService.extractUsername(jwt)).thenReturn(username);
         when(userDetailsService.findByUsername(username)).thenReturn(Mono.empty());
-        when(jwtService.isTokenValid(jwt, registeredUser)).thenReturn(false);
 
         StepVerifier.create(jwtAuthenticationManager.authenticate(authentication))
                 .expectErrorMatches(t -> (t instanceof AuthenticationServiceException))

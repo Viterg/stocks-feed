@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import ru.viterg.proselyte.stocksfeed.security.BearerToken;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(AuthenticationRestControllerV1.class)
-@Import(WebFluxControllerSecurityTestConfig.class)
+@ContextConfiguration(classes = WebFluxControllerSecurityTestConfig.class)
 class AuthenticationRestControllerV1Test {
 
     @MockBean

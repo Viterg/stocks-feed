@@ -5,8 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -14,18 +15,19 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static ru.viterg.proselyte.stocksfeed.user.Role.AUTHORIZED_NEW;
 import static ru.viterg.proselyte.stocksfeed.user.Role.AUTHORIZED_REGULAR;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class RegisteredUserServiceTest {
 
     @InjectMocks
     private RegisteredUserService registeredUserService;
-    private final RegisteredUserRepository repository = mock(RegisteredUserRepository.class);
-    private final PasswordEncoder encoder = mock(PasswordEncoder.class);
+    @Mock
+    private RegisteredUserRepository repository;
+    @Mock
+    private PasswordEncoder encoder;
 
     private String username;
     private String password;
