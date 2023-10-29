@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS public.companies
 INSERT INTO companies
 VALUES (1, 'AAPL'),
        (2, 'MSFT'),
-       (3, 'META'),
+       (3, 'GOGL'),
        (4, 'AMZN')
 ON CONFLICT DO NOTHING;
